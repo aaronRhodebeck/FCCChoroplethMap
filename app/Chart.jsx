@@ -9,7 +9,9 @@ const ChartContainer = styled.div`
 `;
 
 export default class Chart extends React.Component {
-  componentWillMount() {}
+  componentWillMount() {
+    console.log(this.props.educationData, this.props.topographicData);
+  }
   render() {
     return <ChartContainer>Chart is in progress</ChartContainer>;
   }

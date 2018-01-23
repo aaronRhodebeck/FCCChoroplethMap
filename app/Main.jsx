@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import Chart from './Chart';
+import * as getData from './ajaxCalls';
 
 const AppContainer = styled.div`
   padding: 2%;
@@ -22,7 +23,16 @@ const AuthorLink = styled.a`
 `;
 
 class Main extends React.Component {
-  componentWillMount() {}
+  constructor(props) {
+    super(props);
+    this.state = { educationData: null, topographicData: null };
+  }
+  componentWillMount() {
+    const component = this;
+    getData.getEducationData(component);
+    getData.getTopographicalData(component);
+  }
+
   render() {
     return (
       <AppContainer>
@@ -31,7 +41,13 @@ class Main extends React.Component {
           A map showing educational attainment by county <br /> created using D3 and React
           by <AuthorLink href="www.github.com/aaronRhodebeck">Aaron Rhodebeck</AuthorLink>
         </PageSubTitle>
-        <Chart />
+        {this.state.educationData &&
+          this.state.topographicData && (
+            <Chart
+              educationData={this.state.educationData}
+              topographicData={this.state.topographicData}
+            />
+          )}
       </AppContainer>
     );
   }
