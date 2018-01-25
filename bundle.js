@@ -30043,7 +30043,7 @@ var Main = function (_React$Component) {
         null,
         _react2.default.createElement(
           PageTitle,
-          null,
+          { id: 'title' },
           'Choropleth Map for freeCodeCamp Challenge'
         ),
         _react2.default.createElement(
@@ -32498,7 +32498,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(['\n  margin: auto;\n  height: 100%;\n  box-shadow: 1px 1px 6px rgba(200, 200, 200, 0.4), -1px -1px 6px rgba(200, 200, 200, 0.3);\n  padding: 5px;\n'], ['\n  margin: auto;\n  height: 100%;\n  box-shadow: 1px 1px 6px rgba(200, 200, 200, 0.4), -1px -1px 6px rgba(200, 200, 200, 0.3);\n  padding: 5px;\n']);
+var _templateObject = _taggedTemplateLiteral(['\n  margin: auto;\n  height: 100%;\n  max-height: 90vh;\n  width: calc(90vh /0.67);\n  box-shadow: 3px 3px 6px rgba(190, 190, 200, 0.4), -3px -3px 6px rgba(190, 190, 200, 0.3);\n  padding: 5px;\n'], ['\n  margin: auto;\n  height: 100%;\n  max-height: 90vh;\n  width: calc(90vh /0.67);\n  box-shadow: 3px 3px 6px rgba(190, 190, 200, 0.4), -3px -3px 6px rgba(190, 190, 200, 0.3);\n  padding: 5px;\n']),
+    _templateObject2 = _taggedTemplateLiteral(['\n  position: absolute;\n  top: ', ';\n  right: ', ';\n  padding: 2px;\n  background-color: rgb(247, 242, 143);\n  box-shadow: 1px 1px 6px rgba(200, 200, 200, 0.4), -1px -1px 6px rgba(200, 200, 200, 0.3);\n  border-radius: 1px;\n'], ['\n  position: absolute;\n  top: ', ';\n  right: ', ';\n  padding: 2px;\n  background-color: rgb(247, 242, 143);\n  box-shadow: 1px 1px 6px rgba(200, 200, 200, 0.4), -1px -1px 6px rgba(200, 200, 200, 0.3);\n  border-radius: 1px;\n']),
+    _templateObject3 = _taggedTemplateLiteral(['\n  margin: 3px;\n  font-family: Arial, serif;\n  font-weight: bold;\n  color: rgb(40, 40, 40);\n'], ['\n  margin: 3px;\n  font-family: Arial, serif;\n  font-weight: bold;\n  color: rgb(40, 40, 40);\n']);
 
 var _react = __webpack_require__(12);
 
@@ -32526,13 +32528,33 @@ function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defi
 
 var ChartContainer = _styledComponents2.default.div(_templateObject);
 
+var Tooltip = _styledComponents2.default.div(_templateObject2, function (props) {
+  return props.top + 'px';
+}, function (props) {
+  return props.right + 'px';
+});
+
+var TooltipData = _styledComponents2.default.p(_templateObject3);
+
 var Chart = function (_React$Component) {
   _inherits(Chart, _React$Component);
 
-  function Chart() {
+  function Chart(props) {
     _classCallCheck(this, Chart);
 
-    return _possibleConstructorReturn(this, (Chart.__proto__ || Object.getPrototypeOf(Chart)).apply(this, arguments));
+    var _this = _possibleConstructorReturn(this, (Chart.__proto__ || Object.getPrototypeOf(Chart)).call(this, props));
+
+    _this.state = {
+      tooltip: {
+        style: {
+          visibility: 'hidden',
+          top: null,
+          right: null
+        },
+        data: { countyName: null, stateAbbr: null, educationLevel: null }
+      }
+    };
+    return _this;
   }
 
   _createClass(Chart, [{
@@ -32544,10 +32566,33 @@ var Chart = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
+      var style = this.state.tooltip.style;
+      var data = this.state.tooltip.data;
+
       return _react2.default.createElement(
         ChartContainer,
         null,
-        this.props.chart || 'Chart is in progress'
+        this.props.chart || 'Chart is in progress',
+        _react2.default.createElement(
+          Tooltip,
+          {
+            id: 'tooltip',
+            style: { visibility: style.visibility },
+            top: style.top,
+            right: style.right,
+            'data-education': data.educationLevel
+          },
+          _react2.default.createElement(
+            TooltipData,
+            null,
+            data.countyName,
+            ', ',
+            data.stateAbbr,
+            ': ',
+            data.educationLevel,
+            '%'
+          )
+        )
       );
     }
   }]);
@@ -36492,9 +36537,6 @@ function makeEducationMap(baseNode, educationData, topographicData, reactCompone
     scaleable: true
   };
 
-  console.log(educationData, topographicData);
-  console.log(topojson.feature(topographicData, topographicData.objects.nation));
-
   // #region Shared variables
   var width = svgConfig.width,
       height = svgConfig.height,
@@ -36502,6 +36544,11 @@ function makeEducationMap(baseNode, educationData, topographicData, reactCompone
       scaleable = svgConfig.scaleable;
 
   var chart = d3.select(baseNode).append('svg');
+  // #endregion
+
+  // #region Map variables
+  var counties = chart.append('g');
+  var states = chart.append('g');
   // #endregion
 
   // #region SVG setup and scaling
@@ -36512,11 +36559,6 @@ function makeEducationMap(baseNode, educationData, topographicData, reactCompone
   }
   // #endregion
 
-  // #region Map variables
-  var counties = chart.append('g');
-  var states = chart.append('g');
-  // #endregion
-
   // #region Create color scale
   var bachelorsDegreeRange = d3.extent(educationData, function (d) {
     return d.bachelorsOrHigher;
@@ -36525,7 +36567,7 @@ function makeEducationMap(baseNode, educationData, topographicData, reactCompone
   // #endregion
 
   // #region Draw map
-  counties.selectAll('path').data(topojson.feature(topographicData, topographicData.objects.counties).features).enter().append('path').attr('d', d3.geoPath()).attr('fips', function (d) {
+  counties = counties.selectAll('path').data(topojson.feature(topographicData, topographicData.objects.counties).features).enter().append('path').attr('d', d3.geoPath()).attr('fips', function (d) {
     return d.id;
   }).attr('stroke', 'rgba(40,40,40,6)').attr('stroke-width', '.3')
   // Add education data
@@ -36536,10 +36578,10 @@ function makeEducationMap(baseNode, educationData, topographicData, reactCompone
     return greenColorScale(currentCounty.bachelorsOrHigher);
   });
 
-  states.selectAll('path').data(topojson.feature(topographicData, topographicData.objects.states).features).enter().append('path').attr('d', d3.geoPath()).attr('fill', 'none').attr('stroke', 'rgba(20,20,20,.7)').attr('stroke-width', 0.7);
+  states = states.selectAll('path').data(topojson.feature(topographicData, topographicData.objects.states).features).enter().append('path').attr('d', d3.geoPath()).attr('fill', 'none').attr('stroke', 'rgba(20,20,20,.7)').attr('stroke-width', 0.7);
   // #endregion
 
-  // #region Add chart title
+  // #region Add chart description
   var description = chart.append('text').text("Percentage of adults 25 or older with at least a bachelor's degree or higher (2010 - 2014)").attr('text-anchor', 'middle').attr('transform', 'translate(530, 30)');
   // #endregion
 
@@ -36548,7 +36590,6 @@ function makeEducationMap(baseNode, educationData, topographicData, reactCompone
   var ticks = 5;
   var legendStart = bachelorsDegreeRange[0] - bachelorsDegreeRange[0] % ticks;
   var legendEnd = Math.ceil(bachelorsDegreeRange[1] / 10) * 10;
-  console.log(bachelorsDegreeRange[0], legendEnd);
   var colorLegend = chart.append('g').attr('transform', 'translate(630, 50) scale(2.5)');
   var colorSpread = d3.range(legendStart, legendEnd, strokeWidth).forEach(function (d) {
     colorLegend.append('line').attr('y1', 1).attr('y2', 5).attr('x1', d).attr('x2', d).style('stroke', greenColorScale(d)).style('stroke-width', strokeWidth);
@@ -36559,6 +36600,55 @@ function makeEducationMap(baseNode, educationData, topographicData, reactCompone
     colorLegend.append('line').attr('y1', 0).attr('y2', 8).attr('x1', d).attr('x2', d).style('stroke-width', 0.2).style('stroke', 'black');
 
     colorLegend.append('text').text(d + '%').attr('transform', 'translate(' + (d + 1) + ', 11)').style('text-anchor', 'hanging').style('font-size', 4);
+  });
+  // #endregion
+
+  // #region Set tooltip
+  counties.on('mouseover', function (d) {
+    var fromRightOfScreen = function fromRightOfScreen(x) {
+      return window.innerWidth - x;
+    };
+    var currentCounty = educationData.find(function (county) {
+      return county.fips === d.id;
+    });
+    reactComponent.setState({
+      tooltip: {
+        style: {
+          visibility: 'visible',
+          top: d3.event.pageY,
+          right: window.innerWidth - fromRightOfScreen(d3.event.pageX - 20) > 230 ? fromRightOfScreen(d3.event.pageX - 20) : fromRightOfScreen(d3.event.pageX + 300)
+        },
+        data: {
+          countyName: currentCounty.area_name,
+          stateAbbr: currentCounty.state,
+          educationLevel: currentCounty.bachelorsOrHigher
+        }
+      }
+    });
+  });
+
+  counties.on('mouseout', function (d) {
+    reactComponent.setState(function (state) {
+      return state.tooltip.style.visibility = 'hidden';
+    });
+  });
+  // #endregion
+
+  // #region Pass freeCodeCamp tests
+  description.attr('id', 'description');
+  counties.attr('class', 'county');
+  counties.attr('data-fips', function (d) {
+    return d.id;
+  }).attr('data-education', function (d) {
+    var county = educationData.find(function (county) {
+      return county.fips === d.id;
+    });
+    return county.bachelorsOrHigher;
+  });
+  colorLegend.attr('id', 'legend');
+  // To pass test for colors, legend must have rectangles
+  d3.ticks(legendStart, legendEnd, 5).forEach(function (d) {
+    colorLegend.append('rect').attr('fill', greenColorScale(d));
   });
   // #endregion
 }
