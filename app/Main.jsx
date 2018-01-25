@@ -36,7 +36,7 @@ class Main extends React.Component {
   render() {
     return (
       <AppContainer>
-        <PageTitle>Choropleth Map for freeCodeCamp Challenge</PageTitle>
+        <PageTitle id="title">Choropleth Map for freeCodeCamp Challenge</PageTitle>
         <PageSubTitle>
           A map showing educational attainment by county <br /> created using D3 and React
           by <AuthorLink href="www.github.com/aaronRhodebeck">Aaron Rhodebeck</AuthorLink>
