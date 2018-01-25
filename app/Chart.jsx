@@ -6,7 +6,9 @@ import makeEducationMap from './makeEducationMap';
 const ChartContainer = styled.div`
   margin: auto;
   height: 100%;
-  box-shadow: 1px 1px 6px rgba(200, 200, 200, 0.4), -1px -1px 6px rgba(200, 200, 200, 0.3);
+  max-height: 90vh;
+  width: calc(90vh /0.67);
+  box-shadow: 3px 3px 6px rgba(190, 190, 200, 0.4), -3px -3px 6px rgba(190, 190, 200, 0.3);
   padding: 5px;
 `;
 
@@ -14,7 +16,6 @@ const Tooltip = styled.div`
   position: absolute;
   top: ${props => props.top + 'px'};
   right: ${props => props.right + 'px'};
-  visibility: ${props => props.visibility};
   padding: 2px;
   background-color: rgb(247, 242, 143);
   box-shadow: 1px 1px 6px rgba(200, 200, 200, 0.4), -1px -1px 6px rgba(200, 200, 200, 0.3);
@@ -42,6 +43,7 @@ class Chart extends React.Component {
       },
     };
   }
+
   componentWillMount() {
     const faux = this.props.connectFauxDOM('div', 'chart');
     makeEducationMap(faux, this.props.educationData, this.props.topographicData, this);
@@ -52,7 +54,13 @@ class Chart extends React.Component {
     return (
       <ChartContainer>
         {this.props.chart || 'Chart is in progress'}
-        <Tooltip visibility={style.visibility} top={style.top} right={style.right}>
+        <Tooltip
+          id="tooltip"
+          style={{ visibility: style.visibility }}
+          top={style.top}
+          right={style.right}
+          data-education={data.educationLevel}
+        >
           <TooltipData>
             {data.countyName}, {data.stateAbbr}: {data.educationLevel}%
           </TooltipData>
