@@ -19,12 +19,14 @@ export default function makeEducationMap(
     scaleable: true,
   },
 ) {
-  console.log(educationData, topographicData);
-  console.log(topojson.feature(topographicData, topographicData.objects.nation));
-
   // #region Shared variables
   const { width, height, margin, scaleable } = svgConfig;
   const chart = d3.select(baseNode).append('svg');
+  // #endregion
+
+  // #region Map variables
+  let counties = chart.append('g');
+  let states = chart.append('g');
   // #endregion
 
   // #region SVG setup and scaling
@@ -37,11 +39,6 @@ export default function makeEducationMap(
   }
   // #endregion
 
-  // #region Map variables
-  const counties = chart.append('g');
-  const states = chart.append('g');
-  // #endregion
-
   // #region Create color scale
   const bachelorsDegreeRange = d3.extent(educationData, d => d.bachelorsOrHigher);
   const greenColorScale = d3
@@ -50,7 +47,7 @@ export default function makeEducationMap(
   // #endregion
 
   // #region Draw map
-  counties
+  counties = counties
     .selectAll('path')
     .data(topojson.feature(topographicData, topographicData.objects.counties).features)
     .enter()
@@ -65,7 +62,7 @@ export default function makeEducationMap(
       return greenColorScale(currentCounty.bachelorsOrHigher);
     });
 
-  states
+  states = states
     .selectAll('path')
     .data(topojson.feature(topographicData, topographicData.objects.states).features)
     .enter()
@@ -91,7 +88,6 @@ export default function makeEducationMap(
   const ticks = 5;
   const legendStart = bachelorsDegreeRange[0] - bachelorsDegreeRange[0] % ticks;
   const legendEnd = Math.ceil(bachelorsDegreeRange[1] / 10) * 10;
-  console.log(bachelorsDegreeRange[0], legendEnd);
   const colorLegend = chart
     .append('g')
     .attr('transform', 'translate(630, 50) scale(2.5)');
@@ -123,6 +119,34 @@ export default function makeEducationMap(
       .attr('transform', `translate(${d + 1}, 11)`)
       .style('text-anchor', 'hanging')
       .style('font-size', 4);
+  });
+  // #endregion
+
+  // #region Set tooltip
+  counties.on('mouseover', function(d) {
+    const fromRightOfScreen = x => window.innerWidth - x;
+    const currentCounty = educationData.find(county => county.fips === d.id);
+    reactComponent.setState({
+      tooltip: {
+        style: {
+          visibility: 'visible',
+          top: d3.event.pageY,
+          right:
+            window.innerWidth - fromRightOfScreen(d3.event.pageX - 20) > 230
+              ? fromRightOfScreen(d3.event.pageX - 20)
+              : fromRightOfScreen(d3.event.pageX + 300),
+        },
+        data: {
+          countyName: currentCounty.area_name,
+          stateAbbr: currentCounty.state,
+          educationLevel: currentCounty.bachelorsOrHigher,
+        },
+      },
+    });
+  });
+
+  counties.on('mouseout', function(d) {
+    reactComponent.setState(state => (state.tooltip.style.visibility = 'hidden'));
   });
   // #endregion
 }
