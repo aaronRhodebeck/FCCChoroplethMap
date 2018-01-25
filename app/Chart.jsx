@@ -6,7 +6,9 @@ import makeEducationMap from './makeEducationMap';
 const ChartContainer = styled.div`
   margin: auto;
   height: 100%;
-  box-shadow: 1px 1px 6px rgba(200, 200, 200, 0.4), -1px -1px 6px rgba(200, 200, 200, 0.3);
+  max-height: 90vh;
+  width: calc(90vh /0.67);
+  box-shadow: 3px 3px 6px rgba(190, 190, 200, 0.4), -3px -3px 6px rgba(190, 190, 200, 0.3);
   padding: 5px;
 `;
 
@@ -42,6 +44,7 @@ class Chart extends React.Component {
       },
     };
   }
+
   componentWillMount() {
     const faux = this.props.connectFauxDOM('div', 'chart');
     makeEducationMap(faux, this.props.educationData, this.props.topographicData, this);
